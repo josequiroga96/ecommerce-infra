@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  db:
+    image: mdillon/postgis:10
+    container_name: "db"
+    ports:
+    - 5432:5432
+    environment:
+      POSTGRES_USER: sa
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: rainbow_database
+    volumes:
+      - pgdb-data:/var/lib/postgresql/data/
+    networks:
+      - backend
+
+  back:
+    image: e-commerce/back
+    container_name: "back"
+    depends_on:
+      - db
+    build:
+      context: ../back
+      dockerfile: Dockerfile
+    ports:
+    - 8080:8080
+    networks:
+      - backend
+      - frontend
+
+  front:
+    image: e-commerce/front
+    container_name: "front"
+    depends_on:
+      - back
+    build:
+      context: ../front
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    tty:
+      true
+    networks:
+      - frontend
+
+volumes:
+  pgdb-data:
+
+networks:
+  backend:
+  frontend:
